@@ -71,6 +71,55 @@ A modern, web-based IP subnet calculator with a Mac-inspired interface that prov
 
 © 2025 Chris Smolen
 
+## Installation & Deployment
+
+### Using the Web Version
+Simply visit the hosted version at: [https://smolz.github.io/ip-calculator-v4/](https://smolz.github.io/ip-calculator-v4/)
+
+### Add to Home Screen / Dock (PWA)
+This app works as a Progressive Web App (PWA) and can be installed on your device:
+
+**iOS Safari:**
+1. Open the app in Safari
+2. Tap the Share button (square with arrow)
+3. Select "Add to Home Screen"
+4. Confirm and the app will appear on your home screen
+
+**macOS Safari:**
+1. Open the app in Safari
+2. Click File menu → "Add to Dock"
+3. The app will appear in your dock as a standalone application
+
+**Chrome/Edge (Desktop & Mobile):**
+1. Look for the install icon in the address bar
+2. Click "Install IP Calculator v4"
+3. The app will install as a native-like application
+
+### Deploy Your Own Copy
+
+#### GitHub Pages (Recommended)
+1. Fork or create a new repository on GitHub
+2. Upload the `index.html` file to the repository root
+3. Go to repository **Settings** → **Pages**
+4. Select **"Deploy from a branch"** → **"main"** → **"/ (root)"**
+5. Your app will be live at `https://yourusername.github.io/repository-name/`
+
+#### Local Development
+```bash
+# Python 3
+python3 -m http.server 8000
+
+# Node.js (install http-server first)
+npm install -g http-server
+http-server
+
+# PHP
+php -S localhost:8000
+```
+Then visit `http://localhost:8000`
+
+**Note:** PWA features require HTTPS or localhost - they won't work with `file://` URLs.
+
 ## Browser Compatibility
 
 - Chrome 80+
