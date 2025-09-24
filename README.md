@@ -2,6 +2,8 @@
 
 A modern, web-based IP subnet calculator with a Mac-inspired interface that provides comprehensive network information across multiple number formats.
 
+![IP Calculator v4 Screenshot](screenshot.png)
+
 ## Features
 
 ### Multi-Format Display
