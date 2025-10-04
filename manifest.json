@@ -1,0 +1,18 @@
+{
+  "name": "IPv4 Calculator",
+  "short_name": "IPv4 Calc",
+  "description": "Modern IP subnet calculator with multi-format display",
+  "start_url": "./",
+  "display": "standalone",
+  "theme_color": "#007AFF",
+  "background_color": "#f0f0f0",
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ]
+}
