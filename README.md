@@ -6,6 +6,16 @@ A modern, web-based IP subnet calculator with a Mac-inspired interface that prov
 
 ## Features
 
+### VLSM Subnet Calculator (New in v2.0)
+- **Visual Subnet Breakdown** - Interactive table showing all possible subnet divisions
+- **Clickable CIDR Notation** - Click any /X value to see detailed subnet information
+- **Full /30, /31, /32 Support** - Proper handling of special subnet types:
+  - **/30 Subnets** - 4 IP addresses (2 usable hosts)
+  - **/31 Point-to-Point** - RFC 3021 compliant, 2 usable IPs (no broadcast)
+  - **/32 Host Routes** - Single host addresses
+- **Detailed Subnet Views** - Network, broadcast, usable range for each subnet
+- **Smart Labeling** - Appropriate terminology for each subnet type
+
 ### Multi-Format Display
 - **Decimal** - Standard dotted decimal notation (192.168.1.0)
 - **Octal** - Base-8 representation (300.250.1.0)
@@ -34,6 +44,7 @@ A modern, web-based IP subnet calculator with a Mac-inspired interface that prov
 
 ### User Interface
 - **Mac-Style Design** - Native macOS application appearance
+- **Dual Mode Toggle** - Switch between Network Details and VLSM Subnets views
 - **Responsive Layout** - Clean, organized four-panel display
 - **Keyboard Support** - Enter key triggers calculations
 - **About Dialog** - Version and copyright information
@@ -41,10 +52,13 @@ A modern, web-based IP subnet calculator with a Mac-inspired interface that prov
 ## Usage
 
 1. **Enter an IP Address** - Type any valid IPv4 address in the input field
-2. **Set CIDR Notation** - Use the slider or manual input for subnet mask
-3. **View Results** - All network information updates automatically across all formats
-4. **Use Presets** - Click A, B, or C buttons for common network classes
-5. **Clear and Reset** - Use the Clear button to start over
+2. **Set CIDR Notation** - Use the slider or manual input for subnet mask (supports /2 to /32)
+3. **Choose Your View**:
+   - **Network Details** - See IP information in Decimal, Octal, Hex, and Binary formats
+   - **VLSM Subnets** - View all possible subnet divisions and click any CIDR to see detailed breakdown
+4. **View Results** - All network information updates automatically across all formats
+5. **Explore Subnets** - In VLSM mode, click any /X notation to see all subnets at that level
+6. **Clear and Reset** - Use the Clear button to start over
 
 ## Supported Network Classes
 
@@ -60,12 +74,24 @@ A modern, web-based IP subnet calculator with a Mac-inspired interface that prov
 - Works in all modern web browsers
 - Responsive design for different screen sizes
 
-## Version Information
+## Version History
 
-- **Version**: 1.0
-- **Release Date**: 2025
-- **Author**: Chris Smolen
-- **Repository**: [github.com/smolz/ip-calculator-v4](https://github.com/smolz/ip-calculator-v4)
+### Version 2.0 (2025)
+- Added VLSM Subnet Calculator with interactive subnet breakdown
+- Full support for /30, /31 (RFC 3021), and /32 subnets
+- Dual-mode interface (Network Details / VLSM Subnets)
+- Clickable CIDR notation for detailed subnet views
+- Smart labeling for point-to-point and host route subnets
+
+### Version 1.0 (2025)
+- Initial release
+- Multi-format display (Decimal, Octal, Hex, Binary)
+- Network calculations and analysis
+- Mac-style user interface
+- Real-time updates and input validation
+
+**Author**: Chris Smolen  
+**Repository**: [github.com/smolz/ip-calculator-v4](https://github.com/smolz/ip-calculator-v4)
 
 ## License
 

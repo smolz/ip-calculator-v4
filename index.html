@@ -774,7 +774,7 @@
             <div class="about-title">IPv4 Calculator</div>
             <div class="about-info">
                 <strong>Created by:</strong> Chris Smolen<br>
-                <strong>Version:</strong> 1.0<br>
+                <strong>Version:</strong> 2.0<br>
                 <strong>Copyright:</strong> © 2025<br><br>
                 <a href="https://github.com/smolz/ip-calculator-v4" class="about-link" target="_blank">
                     https://github.com/smolz/ip-calculator-v4
@@ -866,9 +866,9 @@
                 const ip = this.ipInput.value.trim();
                 const cidr = parseInt(this.cidrInput.value);
                 
-                if (!ip || !this.isValidIP(ip) || cidr >= 31) {
+                if (!ip || !this.isValidIP(ip) || cidr >= 32) {
                     document.getElementById('vlsm-content').innerHTML = 
-                        '<div class="vlsm-note">Enter a valid network address with CIDR /30 or lower to see subnet breakdown</div>';
+                        '<div class="vlsm-note">Enter a valid network address with CIDR /31 or lower to see subnet breakdown</div>';
                     return;
                 }
                 
@@ -886,26 +886,49 @@
                 html += '</tr></thead>';
                 html += '<tbody>';
                 
-                // Generate rows for each possible subnet size from current CIDR + 1 to /30
-                for (let newCidr = cidr + 1; newCidr <= 30; newCidr++) {
+                // Generate rows for each possible subnet size from current CIDR + 1 to /32
+                for (let newCidr = cidr + 1; newCidr <= 32; newCidr++) {
                     const numSubnets = Math.pow(2, newCidr - cidr);
-                    const hostsPerSubnet = Math.pow(2, 32 - newCidr) - 2;
                     const subnetSize = Math.pow(2, 32 - newCidr);
                     const subnetMask = this.cidrToMask(newCidr);
+                    
+                    // Calculate hosts per subnet based on CIDR
+                    let hostsPerSubnet;
+                    let hostsDisplay;
+                    if (newCidr === 32) {
+                        hostsPerSubnet = 1;
+                        hostsDisplay = '1 (host route)';
+                    } else if (newCidr === 31) {
+                        hostsPerSubnet = 2;
+                        hostsDisplay = '2 (point-to-point)';
+                    } else {
+                        hostsPerSubnet = Math.pow(2, 32 - newCidr) - 2;
+                        hostsDisplay = hostsPerSubnet.toLocaleString();
+                    }
                     
                     // Calculate first subnet range
                     const firstSubnetNetwork = networkInt;
                     const firstSubnetBroadcast = firstSubnetNetwork + subnetSize - 1;
-                    const firstIP = this.intToIp(firstSubnetNetwork + 1);
-                    const lastIP = this.intToIp(firstSubnetBroadcast - 1);
-                    const rangeStr = `${firstIP} - ${lastIP}`;
+                    
+                    let rangeStr;
+                    if (newCidr === 32) {
+                        rangeStr = this.intToIp(firstSubnetNetwork);
+                    } else if (newCidr === 31) {
+                        const ip1 = this.intToIp(firstSubnetNetwork);
+                        const ip2 = this.intToIp(firstSubnetNetwork + 1);
+                        rangeStr = `${ip1}, ${ip2}`;
+                    } else {
+                        const firstIP = this.intToIp(firstSubnetNetwork + 1);
+                        const lastIP = this.intToIp(firstSubnetBroadcast - 1);
+                        rangeStr = `${firstIP} - ${lastIP}`;
+                    }
                     
                     html += '<tr>';
-                    html += `<td class="vlsm-count">${subnetSize.toLocaleString()} IPs</td>`;
+                    html += `<td class="vlsm-count">${subnetSize.toLocaleString()} ${subnetSize === 1 ? 'IP' : 'IPs'}</td>`;
                     html += `<td><span class="vlsm-cidr" onclick="calculator.showSubnetDetails(${newCidr})">/${newCidr}</span></td>`;
                     html += `<td class="vlsm-range">${subnetMask}</td>`;
                     html += `<td class="vlsm-count">${numSubnets.toLocaleString()}</td>`;
-                    html += `<td class="vlsm-count">${hostsPerSubnet.toLocaleString()}</td>`;
+                    html += `<td class="vlsm-count">${hostsDisplay}</td>`;
                     html += `<td class="vlsm-range">${rangeStr}</td>`;
                     html += '</tr>';
                 }
@@ -922,8 +945,21 @@
                 const networkInt = this.ipToInt(ip) & ((0xFFFFFFFF << (32 - cidr)) >>> 0);
                 const numSubnets = Math.pow(2, targetCidr - cidr);
                 const subnetSize = Math.pow(2, 32 - targetCidr);
-                const hostsPerSubnet = Math.pow(2, 32 - targetCidr) - 2;
                 const subnetMask = this.cidrToMask(targetCidr);
+                
+                // Calculate hosts per subnet based on CIDR
+                let hostsPerSubnet;
+                let hostsDisplay;
+                if (targetCidr === 32) {
+                    hostsPerSubnet = 1;
+                    hostsDisplay = '1 (host route)';
+                } else if (targetCidr === 31) {
+                    hostsPerSubnet = 2;
+                    hostsDisplay = '2 (point-to-point)';
+                } else {
+                    hostsPerSubnet = Math.pow(2, 32 - targetCidr) - 2;
+                    hostsDisplay = hostsPerSubnet.toLocaleString();
+                }
                 
                 let html = '<div class="vlsm-expanded">';
                 html += '<div class="vlsm-expanded-title">';
@@ -936,9 +972,6 @@
                     const subnetNetwork = networkInt + (i * subnetSize);
                     const subnetBroadcast = subnetNetwork + subnetSize - 1;
                     const network = this.intToIp(subnetNetwork);
-                    const broadcast = this.intToIp(subnetBroadcast);
-                    const firstIP = this.intToIp(subnetNetwork + 1);
-                    const lastIP = this.intToIp(subnetBroadcast - 1);
                     
                     html += '<div class="vlsm-subnet-item">';
                     html += `<div class="vlsm-subnet-header">Subnet ${i + 1}: ${network}/${targetCidr}</div>`;
@@ -950,18 +983,49 @@
                     html += '<span class="vlsm-subnet-label">Network:</span>';
                     html += `<span class="vlsm-subnet-value">${network}</span>`;
                     html += '</div>';
-                    html += '<div class="vlsm-subnet-detail">';
-                    html += '<span class="vlsm-subnet-label">Broadcast:</span>';
-                    html += `<span class="vlsm-subnet-value">${broadcast}</span>`;
-                    html += '</div>';
-                    html += '<div class="vlsm-subnet-detail">';
-                    html += '<span class="vlsm-subnet-label">Usable Range:</span>';
-                    html += `<span class="vlsm-subnet-value">${firstIP} - ${lastIP}</span>`;
-                    html += '</div>';
-                    html += '<div class="vlsm-subnet-detail">';
-                    html += '<span class="vlsm-subnet-label">Usable Hosts:</span>';
-                    html += `<span class="vlsm-subnet-value">${hostsPerSubnet.toLocaleString()}</span>`;
-                    html += '</div>';
+                    
+                    if (targetCidr === 32) {
+                        // /32 - single host
+                        html += '<div class="vlsm-subnet-detail">';
+                        html += '<span class="vlsm-subnet-label">Host Address:</span>';
+                        html += `<span class="vlsm-subnet-value">${network}</span>`;
+                        html += '</div>';
+                        html += '<div class="vlsm-subnet-detail">';
+                        html += '<span class="vlsm-subnet-label">Type:</span>';
+                        html += `<span class="vlsm-subnet-value">Host Route</span>`;
+                        html += '</div>';
+                    } else if (targetCidr === 31) {
+                        // /31 - point-to-point (RFC 3021)
+                        const ip1 = network;
+                        const ip2 = this.intToIp(subnetNetwork + 1);
+                        html += '<div class="vlsm-subnet-detail">';
+                        html += '<span class="vlsm-subnet-label">Point-to-Point IPs:</span>';
+                        html += `<span class="vlsm-subnet-value">${ip1}, ${ip2}</span>`;
+                        html += '</div>';
+                        html += '<div class="vlsm-subnet-detail">';
+                        html += '<span class="vlsm-subnet-label">Type:</span>';
+                        html += `<span class="vlsm-subnet-value">Point-to-Point Link</span>`;
+                        html += '</div>';
+                    } else {
+                        // Normal subnet
+                        const broadcast = this.intToIp(subnetBroadcast);
+                        const firstIP = this.intToIp(subnetNetwork + 1);
+                        const lastIP = this.intToIp(subnetBroadcast - 1);
+                        
+                        html += '<div class="vlsm-subnet-detail">';
+                        html += '<span class="vlsm-subnet-label">Broadcast:</span>';
+                        html += `<span class="vlsm-subnet-value">${broadcast}</span>`;
+                        html += '</div>';
+                        html += '<div class="vlsm-subnet-detail">';
+                        html += '<span class="vlsm-subnet-label">Usable Range:</span>';
+                        html += `<span class="vlsm-subnet-value">${firstIP} - ${lastIP}</span>`;
+                        html += '</div>';
+                        html += '<div class="vlsm-subnet-detail">';
+                        html += '<span class="vlsm-subnet-label">Usable Hosts:</span>';
+                        html += `<span class="vlsm-subnet-value">${hostsDisplay}</span>`;
+                        html += '</div>';
+                    }
+                    
                     html += '</div>';
                 }
                 

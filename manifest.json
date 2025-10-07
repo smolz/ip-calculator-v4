@@ -1,7 +1,8 @@
 {
   "name": "IPv4 Calculator",
   "short_name": "IPv4 Calc",
-  "description": "Modern IP subnet calculator with multi-format display",
+  "description": "Modern IP subnet calculator with multi-format display and VLSM subnet breakdown",
+  "version": "2.0",
   "start_url": "./",
   "display": "standalone",
   "theme_color": "#007AFF",
