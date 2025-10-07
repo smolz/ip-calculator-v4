@@ -158,6 +158,36 @@
             background: #f8f8f8;
         }
         
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .mode-btn {
+            padding: 10px 20px;
+            border: 2px solid #d0d0d0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.2s ease;
+        }
+        
+        .mode-btn:hover {
+            border-color: #007AFF;
+            color: #007AFF;
+        }
+        
+        .mode-btn.active {
+            background: #007AFF;
+            color: white;
+            border-color: #007AFF;
+        }
+        
         .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -391,6 +421,142 @@
             font-size: 12px;
             font-weight: 600;
         }
+        
+        /* VLSM Styles */
+        .vlsm-view {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .vlsm-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .vlsm-table th {
+            background: #007AFF;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 2px solid #0056CC;
+        }
+        
+        .vlsm-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+        
+        .vlsm-table tr:hover {
+            background: #f8f8f8;
+        }
+        
+        .vlsm-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .vlsm-cidr {
+            font-weight: 600;
+            color: #007AFF;
+            font-family: 'Monaco', 'Menlo', monospace;
+            cursor: pointer;
+            text-decoration: underline;
+            transition: color 0.2s ease;
+        }
+        
+        .vlsm-cidr:hover {
+            color: #0056CC;
+        }
+        
+        .vlsm-range {
+            font-family: 'Monaco', 'Menlo', monospace;
+            color: #333;
+        }
+        
+        .vlsm-count {
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .vlsm-note {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-style: italic;
+        }
+        
+        .vlsm-expanded {
+            margin-top: 20px;
+            background: #f8f8f8;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .vlsm-expanded-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .vlsm-back-btn {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .vlsm-back-btn:hover {
+            background: #0056CC;
+        }
+        
+        .vlsm-subnet-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .vlsm-subnet-item {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .vlsm-subnet-header {
+            font-weight: 600;
+            color: #007AFF;
+            margin-bottom: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+        
+        .vlsm-subnet-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+        }
+        
+        .vlsm-subnet-label {
+            color: #666;
+        }
+        
+        .vlsm-subnet-value {
+            font-family: 'Monaco', 'Menlo', monospace;
+            color: #333;
+        }
     </style>
 </head>
 <body>
@@ -405,15 +571,18 @@
             <button class="about-btn">i</button>
         </div>
         
-
-        
         <div class="content">
+            <div class="mode-toggle">
+                <button class="mode-btn active" id="details-mode-btn">Network Details</button>
+                <button class="mode-btn" id="vlsm-mode-btn">VLSM Subnets</button>
+            </div>
+            
             <div class="bottom-section">
                 <div class="input-section">
                     <div style="font-weight: 600; margin-bottom: 15px;">Enter your ip address</div>
                     <div class="input-group">
                         <label>Ip address</label>
-                        <input type="text" class="input-field" id="ip-input" value="10.0.0.0">
+                        <input type="text" class="input-field" id="ip-input" value="192.168.1.0">
                         <span>/</span>
                         <input type="number" class="input-field cidr-input" id="cidr-input" value="24" min="0" max="32">
                     </div>
@@ -441,7 +610,7 @@
                     <div class="subnet-info">
                         <div class="subnet-field">
                             <label>Hosts/Subnets</label>
-                            <div class="subnet-value" id="hosts-subnets">254 / 65536</div>
+                            <div class="subnet-value" id="hosts-subnets">254 / 1</div>
                         </div>
                         <div class="private-indicator" id="private-indicator">Private</div>
                     </div>
@@ -456,134 +625,141 @@
                 </div>
             </div>
             
-            <div class="grid">
-                <div class="section">
-                    <div class="section-title">Decimal</div>
-                    <div class="field">
-                        <div class="field-label">Ip address:</div>
-                        <div class="field-value" id="dec-ip">10.0.0.0</div>
+            <div id="details-view">
+                <div class="grid">
+                    <div class="section">
+                        <div class="section-title">Decimal</div>
+                        <div class="field">
+                            <div class="field-label">Ip address:</div>
+                            <div class="field-value" id="dec-ip">192.168.1.0</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Subnet mask:</div>
+                            <div class="field-value" id="dec-mask">255.255.255.0</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Network:</div>
+                            <div class="field-value" id="dec-network">192.168.1.0</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Broadcast:</div>
+                            <div class="field-value" id="dec-broadcast">192.168.1.255</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">First IP:</div>
+                            <div class="field-value" id="dec-first">192.168.1.1</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Last IP:</div>
+                            <div class="field-value" id="dec-last">192.168.1.254</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Wildcard:</div>
+                            <div class="field-value" id="dec-wildcard">0.0.0.255</div>
+                        </div>
                     </div>
-                    <div class="field">
-                        <div class="field-label">Subnet mask:</div>
-                        <div class="field-value" id="dec-mask">255.255.255.0</div>
+                    
+                    <div class="section">
+                        <div class="section-title">Octal</div>
+                        <div class="field">
+                            <div class="field-label">Ip address:</div>
+                            <div class="field-value" id="oct-ip">300.250.1.0</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Subnet mask:</div>
+                            <div class="field-value" id="oct-mask">377.377.377.0</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Network:</div>
+                            <div class="field-value" id="oct-network">300.250.1.0</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Broadcast:</div>
+                            <div class="field-value" id="oct-broadcast">300.250.1.377</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">First IP:</div>
+                            <div class="field-value" id="oct-first">300.250.1.1</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Last IP:</div>
+                            <div class="field-value" id="oct-last">300.250.1.376</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Wildcard:</div>
+                            <div class="field-value" id="oct-wildcard">0.0.0.377</div>
+                        </div>
                     </div>
-                    <div class="field">
-                        <div class="field-label">Network:</div>
-                        <div class="field-value" id="dec-network">10.0.0.0</div>
+                    
+                    <div class="section">
+                        <div class="section-title">Hexadecimal</div>
+                        <div class="field">
+                            <div class="field-label">Ip address:</div>
+                            <div class="field-value" id="hex-ip">c0.a8.1.0</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Subnet mask:</div>
+                            <div class="field-value" id="hex-mask">ff.ff.ff.0</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Network:</div>
+                            <div class="field-value" id="hex-network">c0.a8.1.0</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Broadcast:</div>
+                            <div class="field-value" id="hex-broadcast">c0.a8.1.ff</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">First IP:</div>
+                            <div class="field-value" id="hex-first">c0.a8.1.1</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Last IP:</div>
+                            <div class="field-value" id="hex-last">c0.a8.1.fe</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Wildcard:</div>
+                            <div class="field-value" id="hex-wildcard">0.0.0.ff</div>
+                        </div>
                     </div>
-                    <div class="field">
-                        <div class="field-label">Broadcast:</div>
-                        <div class="field-value" id="dec-broadcast">10.0.0.255</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">First IP:</div>
-                        <div class="field-value" id="dec-first">10.0.0.1</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Last IP:</div>
-                        <div class="field-value" id="dec-last">10.0.0.254</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Wildcard:</div>
-                        <div class="field-value" id="dec-wildcard">0.0.0.255</div>
+                    
+                    <div class="section">
+                        <div class="section-title">Binary</div>
+                        <div class="field">
+                            <div class="field-label">Ip address:</div>
+                            <div class="field-value" id="bin-ip">11000000.10101000.00000001.00000000</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Subnet mask:</div>
+                            <div class="field-value" id="bin-mask">11111111.11111111.11111111.00000000</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Network:</div>
+                            <div class="field-value" id="bin-network">11000000.10101000.00000001.00000000</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Broadcast:</div>
+                            <div class="field-value" id="bin-broadcast">11000000.10101000.00000001.11111111</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">First IP:</div>
+                            <div class="field-value" id="bin-first">11000000.10101000.00000001.00000001</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Last IP:</div>
+                            <div class="field-value" id="bin-last">11000000.10101000.00000001.11111110</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Wildcard:</div>
+                            <div class="field-value" id="bin-wildcard">00000000.00000000.00000000.11111111</div>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="section">
-                    <div class="section-title">Octal</div>
-                    <div class="field">
-                        <div class="field-label">Ip address:</div>
-                        <div class="field-value" id="oct-ip">12.0.0.0</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Subnet mask:</div>
-                        <div class="field-value" id="oct-mask">377.377.377.0</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Network:</div>
-                        <div class="field-value" id="oct-network">12.0.0.0</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Broadcast:</div>
-                        <div class="field-value" id="oct-broadcast">12.0.0.377</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">First IP:</div>
-                        <div class="field-value" id="oct-first">12.0.0.1</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Last IP:</div>
-                        <div class="field-value" id="oct-last">12.0.0.376</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Wildcard:</div>
-                        <div class="field-value" id="oct-wildcard">0.0.0.377</div>
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <div class="section-title">Hexadecimal</div>
-                    <div class="field">
-                        <div class="field-label">Ip address:</div>
-                        <div class="field-value" id="hex-ip">a.0.0.0</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Subnet mask:</div>
-                        <div class="field-value" id="hex-mask">ff.ff.ff.0</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Network:</div>
-                        <div class="field-value" id="hex-network">a.0.0.0</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Broadcast:</div>
-                        <div class="field-value" id="hex-broadcast">a.0.0.ff</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">First IP:</div>
-                        <div class="field-value" id="hex-first">a.0.0.1</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Last IP:</div>
-                        <div class="field-value" id="hex-last">a.0.0.fe</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Wildcard:</div>
-                        <div class="field-value" id="hex-wildcard">0.0.0.ff</div>
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <div class="section-title">Binary</div>
-                    <div class="field">
-                        <div class="field-label">Ip address:</div>
-                        <div class="field-value" id="bin-ip">00001010.00000000.00000000.00000000</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Subnet mask:</div>
-                        <div class="field-value" id="bin-mask">11111111.11111111.11111111.00000000</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Network:</div>
-                        <div class="field-value" id="bin-network">00001010.00000000.00000000.00000000</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Broadcast:</div>
-                        <div class="field-value" id="bin-broadcast">00001010.00000000.00000000.11111111</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">First IP:</div>
-                        <div class="field-value" id="bin-first">00001010.00000000.00000000.00000001</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Last IP:</div>
-                        <div class="field-value" id="bin-last">00001010.00000000.00000000.11111110</div>
-                    </div>
-                    <div class="field">
-                        <div class="field-label">Wildcard:</div>
-                        <div class="field-value" id="bin-wildcard">00000000.00000000.00000000.11111111</div>
-                    </div>
-                </div>
+            </div>
+            
+            <div class="vlsm-view" id="vlsm-view" style="display: none;">
+                <h3 style="text-align: center; margin-bottom: 20px; color: #333;">VLSM Subnet Breakdown</h3>
+                <div id="vlsm-content"></div>
             </div>
             
             <div style="text-align: center; margin-top: 20px; color: #888; font-size: 12px;">
@@ -609,8 +785,11 @@
     </div>
 
     <script>
+        let calculator; // Global variable for onclick handlers
+        
         class IPCalculator {
             constructor() {
+                this.currentMode = 'details';
                 this.initElements();
                 this.bindEvents();
                 this.calculate();
@@ -622,6 +801,10 @@
                 this.cidrSlider = document.getElementById('cidr-slider');
                 this.calculateBtn = document.getElementById('calculate-btn');
                 this.clearBtn = document.getElementById('clear-btn');
+                this.detailsModeBtn = document.getElementById('details-mode-btn');
+                this.vlsmModeBtn = document.getElementById('vlsm-mode-btn');
+                this.detailsView = document.getElementById('details-view');
+                this.vlsmView = document.getElementById('vlsm-view');
             }
             
             bindEvents() {
@@ -641,6 +824,10 @@
                     if (e.key === 'Enter') this.calculate();
                 });
                 
+                // Mode toggle events
+                this.detailsModeBtn.addEventListener('click', () => this.switchMode('details'));
+                this.vlsmModeBtn.addEventListener('click', () => this.switchMode('vlsm'));
+                
                 // About modal events
                 document.querySelector('.about-btn').addEventListener('click', () => {
                     document.getElementById('about-modal').style.display = 'flex';
@@ -656,6 +843,133 @@
                         document.getElementById('about-modal').style.display = 'none';
                     }
                 });
+            }
+            
+            switchMode(mode) {
+                this.currentMode = mode;
+                
+                if (mode === 'details') {
+                    this.detailsModeBtn.classList.add('active');
+                    this.vlsmModeBtn.classList.remove('active');
+                    this.detailsView.style.display = 'block';
+                    this.vlsmView.style.display = 'none';
+                } else {
+                    this.detailsModeBtn.classList.remove('active');
+                    this.vlsmModeBtn.classList.add('active');
+                    this.detailsView.style.display = 'none';
+                    this.vlsmView.style.display = 'block';
+                    this.generateVLSM();
+                }
+            }
+            
+            generateVLSM() {
+                const ip = this.ipInput.value.trim();
+                const cidr = parseInt(this.cidrInput.value);
+                
+                if (!ip || !this.isValidIP(ip) || cidr >= 31) {
+                    document.getElementById('vlsm-content').innerHTML = 
+                        '<div class="vlsm-note">Enter a valid network address with CIDR /30 or lower to see subnet breakdown</div>';
+                    return;
+                }
+                
+                const networkInt = this.ipToInt(ip) & ((0xFFFFFFFF << (32 - cidr)) >>> 0);
+                const networkIP = this.intToIp(networkInt);
+                
+                let html = '<table class="vlsm-table">';
+                html += '<thead><tr>';
+                html += '<th>Subnet Size</th>';
+                html += '<th>CIDR</th>';
+                html += '<th>Subnet Mask</th>';
+                html += '<th>Number of Subnets</th>';
+                html += '<th>Hosts per Subnet</th>';
+                html += '<th>First Subnet Range</th>';
+                html += '</tr></thead>';
+                html += '<tbody>';
+                
+                // Generate rows for each possible subnet size from current CIDR + 1 to /30
+                for (let newCidr = cidr + 1; newCidr <= 30; newCidr++) {
+                    const numSubnets = Math.pow(2, newCidr - cidr);
+                    const hostsPerSubnet = Math.pow(2, 32 - newCidr) - 2;
+                    const subnetSize = Math.pow(2, 32 - newCidr);
+                    const subnetMask = this.cidrToMask(newCidr);
+                    
+                    // Calculate first subnet range
+                    const firstSubnetNetwork = networkInt;
+                    const firstSubnetBroadcast = firstSubnetNetwork + subnetSize - 1;
+                    const firstIP = this.intToIp(firstSubnetNetwork + 1);
+                    const lastIP = this.intToIp(firstSubnetBroadcast - 1);
+                    const rangeStr = `${firstIP} - ${lastIP}`;
+                    
+                    html += '<tr>';
+                    html += `<td class="vlsm-count">${subnetSize.toLocaleString()} IPs</td>`;
+                    html += `<td><span class="vlsm-cidr" onclick="calculator.showSubnetDetails(${newCidr})">/${newCidr}</span></td>`;
+                    html += `<td class="vlsm-range">${subnetMask}</td>`;
+                    html += `<td class="vlsm-count">${numSubnets.toLocaleString()}</td>`;
+                    html += `<td class="vlsm-count">${hostsPerSubnet.toLocaleString()}</td>`;
+                    html += `<td class="vlsm-range">${rangeStr}</td>`;
+                    html += '</tr>';
+                }
+                
+                html += '</tbody></table>';
+                html += '<div id="vlsm-expanded-view"></div>';
+                document.getElementById('vlsm-content').innerHTML = html;
+            }
+            
+            showSubnetDetails(targetCidr) {
+                const ip = this.ipInput.value.trim();
+                const cidr = parseInt(this.cidrInput.value);
+                
+                const networkInt = this.ipToInt(ip) & ((0xFFFFFFFF << (32 - cidr)) >>> 0);
+                const numSubnets = Math.pow(2, targetCidr - cidr);
+                const subnetSize = Math.pow(2, 32 - targetCidr);
+                const hostsPerSubnet = Math.pow(2, 32 - targetCidr) - 2;
+                const subnetMask = this.cidrToMask(targetCidr);
+                
+                let html = '<div class="vlsm-expanded">';
+                html += '<div class="vlsm-expanded-title">';
+                html += `<span>All /${targetCidr} Subnets (${numSubnets.toLocaleString()} total)</span>`;
+                html += '<button class="vlsm-back-btn" onclick="calculator.generateVLSM()">← Back</button>';
+                html += '</div>';
+                html += '<div class="vlsm-subnet-list">';
+                
+                for (let i = 0; i < numSubnets; i++) {
+                    const subnetNetwork = networkInt + (i * subnetSize);
+                    const subnetBroadcast = subnetNetwork + subnetSize - 1;
+                    const network = this.intToIp(subnetNetwork);
+                    const broadcast = this.intToIp(subnetBroadcast);
+                    const firstIP = this.intToIp(subnetNetwork + 1);
+                    const lastIP = this.intToIp(subnetBroadcast - 1);
+                    
+                    html += '<div class="vlsm-subnet-item">';
+                    html += `<div class="vlsm-subnet-header">Subnet ${i + 1}: ${network}/${targetCidr}</div>`;
+                    html += '<div class="vlsm-subnet-detail">';
+                    html += '<span class="vlsm-subnet-label">Subnet Mask:</span>';
+                    html += `<span class="vlsm-subnet-value">${subnetMask}</span>`;
+                    html += '</div>';
+                    html += '<div class="vlsm-subnet-detail">';
+                    html += '<span class="vlsm-subnet-label">Network:</span>';
+                    html += `<span class="vlsm-subnet-value">${network}</span>`;
+                    html += '</div>';
+                    html += '<div class="vlsm-subnet-detail">';
+                    html += '<span class="vlsm-subnet-label">Broadcast:</span>';
+                    html += `<span class="vlsm-subnet-value">${broadcast}</span>`;
+                    html += '</div>';
+                    html += '<div class="vlsm-subnet-detail">';
+                    html += '<span class="vlsm-subnet-label">Usable Range:</span>';
+                    html += `<span class="vlsm-subnet-value">${firstIP} - ${lastIP}</span>`;
+                    html += '</div>';
+                    html += '<div class="vlsm-subnet-detail">';
+                    html += '<span class="vlsm-subnet-label">Usable Hosts:</span>';
+                    html += `<span class="vlsm-subnet-value">${hostsPerSubnet.toLocaleString()}</span>`;
+                    html += '</div>';
+                    html += '</div>';
+                }
+                
+                html += '</div></div>';
+                document.getElementById('vlsm-expanded-view').innerHTML = html;
+                
+                // Scroll to the expanded view
+                document.getElementById('vlsm-expanded-view').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
             
             getIPClass(firstOctet) {
@@ -821,6 +1135,11 @@
                     privateIndicator.textContent = 'Public';
                     privateIndicator.style.background = '#44aa44';
                 }
+                
+                // Update VLSM if in that mode
+                if (this.currentMode === 'vlsm') {
+                    this.generateVLSM();
+                }
             }
             
             isValidIP(ip) {
@@ -835,7 +1154,7 @@
         
         // Initialize the calculator when the page loads
         document.addEventListener('DOMContentLoaded', () => {
-            new IPCalculator();
+            calculator = new IPCalculator();
         });
     </script>
 </body>
