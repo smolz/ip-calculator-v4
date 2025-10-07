@@ -269,6 +269,16 @@
             transform: translateX(-50%);
         }
         
+        .slider-value {
+            position: relative;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #007AFF;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+        
         .bottom-section {
             display: flex;
             gap: 20px;
@@ -347,24 +357,30 @@
             border: 1px solid #a0c0d8;
         }
         
-        .class-buttons {
+        .class-indicators {
             display: flex;
             gap: 8px;
         }
         
-        .class-btn {
+        .class-indicator {
             width: 30px;
             height: 30px;
             border: 1px solid #d0d0d0;
             border-radius: 4px;
             background: #f0f0f0;
-            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 14px;
             font-weight: 600;
+            color: #999;
+            transition: all 0.2s ease;
         }
         
-        .class-btn:hover {
-            background: #e0e0e0;
+        .class-indicator.active {
+            background: #007AFF;
+            color: white;
+            border-color: #007AFF;
         }
         
         .private-indicator {
@@ -392,6 +408,54 @@
 
         
         <div class="content">
+            <div class="bottom-section">
+                <div class="input-section">
+                    <div style="font-weight: 600; margin-bottom: 15px;">Enter your ip address</div>
+                    <div class="input-group">
+                        <label>Ip address</label>
+                        <input type="text" class="input-field" id="ip-input" value="10.0.0.0">
+                        <span>/</span>
+                        <input type="number" class="input-field cidr-input" id="cidr-input" value="24" min="0" max="32">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn" id="clear-btn">Clear</button>
+                        <button class="btn btn-primary" id="calculate-btn">Calculate</button>
+                    </div>
+                </div>
+                
+                <div class="input-section">
+                    <div style="font-weight: 600; margin-bottom: 15px;">Subnets</div>
+                    <div class="subnet-info">
+                        <div class="subnet-field">
+                            <label>Subnet mask</label>
+                            <div class="subnet-value" id="subnet-mask-display">255.255.255.0</div>
+                        </div>
+                        <div class="class-indicators">
+                            <span class="class-indicator" id="class-a">A</span>
+                            <span class="class-indicator" id="class-b">B</span>
+                            <span class="class-indicator" id="class-c">C</span>
+                            <span class="class-indicator" id="class-d">D</span>
+                            <span class="class-indicator" id="class-e">E</span>
+                        </div>
+                    </div>
+                    <div class="subnet-info">
+                        <div class="subnet-field">
+                            <label>Hosts/Subnets</label>
+                            <div class="subnet-value" id="hosts-subnets">254 / 65536</div>
+                        </div>
+                        <div class="private-indicator" id="private-indicator">Private</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slider-container">
+                <div class="slider-title">Subnet CIDR</div>
+                <div class="slider-wrapper">
+                    <input type="range" min="2" max="32" value="24" class="slider" id="cidr-slider">
+                    <div class="slider-value" id="slider-value">/24</div>
+                </div>
+            </div>
+            
             <div class="grid">
                 <div class="section">
                     <div class="section-title">Decimal</div>
@@ -522,62 +586,6 @@
                 </div>
             </div>
             
-            <div class="slider-container">
-                <div class="slider-title">Subnet CIDR</div>
-                <div class="slider-wrapper">
-                    <input type="range" min="2" max="32" value="24" class="slider" id="cidr-slider">
-                    <div class="slider-labels">
-                        <span style="position: absolute; left: 0%;">2</span>
-                        <span style="position: absolute; left: 6.67%;">4</span>
-                        <span style="position: absolute; left: 20%;">8</span>
-                        <span style="position: absolute; left: 33.33%;">12</span>
-                        <span style="position: absolute; left: 46.67%;">16</span>
-                        <span style="position: absolute; left: 60%;">20</span>
-                        <span style="position: absolute; left: 73.33%;">24</span>
-                        <span style="position: absolute; left: 86.67%;">28</span>
-                        <span style="position: absolute; left: 100%; transform: translateX(-100%);">32</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="bottom-section">
-                <div class="input-section">
-                    <div style="font-weight: 600; margin-bottom: 15px;">Enter your ip address</div>
-                    <div class="input-group">
-                        <label>Ip address</label>
-                        <input type="text" class="input-field" id="ip-input" value="10.0.0.0">
-                        <span>/</span>
-                        <input type="number" class="input-field cidr-input" id="cidr-input" value="24" min="0" max="32">
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn" id="clear-btn">Clear</button>
-                        <button class="btn btn-primary" id="calculate-btn">Calculate</button>
-                    </div>
-                </div>
-                
-                <div class="input-section">
-                    <div style="font-weight: 600; margin-bottom: 15px;">Subnets</div>
-                    <div class="subnet-info">
-                        <div class="subnet-field">
-                            <label>Subnet mask</label>
-                            <div class="subnet-value" id="subnet-mask-display">255.255.255.0</div>
-                        </div>
-                        <div class="class-buttons">
-                            <button class="class-btn" data-class="A">A</button>
-                            <button class="class-btn" data-class="B">B</button>
-                            <button class="class-btn" data-class="C">C</button>
-                        </div>
-                    </div>
-                    <div class="subnet-info">
-                        <div class="subnet-field">
-                            <label>Hosts/Subnets</label>
-                            <div class="subnet-value" id="hosts-subnets">254 / 65536</div>
-                        </div>
-                        <div class="private-indicator" id="private-indicator">Private</div>
-                    </div>
-                </div>
-            </div>
-            
             <div style="text-align: center; margin-top: 20px; color: #888; font-size: 12px;">
                 © 2025 - Chris Smolen
             </div>
@@ -614,7 +622,6 @@
                 this.cidrSlider = document.getElementById('cidr-slider');
                 this.calculateBtn = document.getElementById('calculate-btn');
                 this.clearBtn = document.getElementById('clear-btn');
-                this.classButtons = document.querySelectorAll('.class-btn');
             }
             
             bindEvents() {
@@ -622,21 +629,16 @@
                 this.clearBtn.addEventListener('click', () => this.clear());
                 this.cidrSlider.addEventListener('input', (e) => {
                     this.cidrInput.value = e.target.value;
+                    this.updateSliderValue(e.target.value);
                     this.calculate();
                 });
                 this.cidrInput.addEventListener('input', (e) => {
                     this.cidrSlider.value = e.target.value;
+                    this.updateSliderValue(e.target.value);
                     this.calculate();
                 });
                 this.ipInput.addEventListener('keyup', (e) => {
                     if (e.key === 'Enter') this.calculate();
-                });
-                
-                this.classButtons.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const className = e.target.dataset.class;
-                        this.setClass(className);
-                    });
                 });
                 
                 // About modal events
@@ -656,25 +658,36 @@
                 });
             }
             
-            setClass(className) {
-                const classDefaults = {
-                    'A': { ip: '10.0.0.0', cidr: 8 },
-                    'B': { ip: '172.16.0.0', cidr: 16 },
-                    'C': { ip: '192.168.1.0', cidr: 24 }
-                };
-                
-                if (classDefaults[className]) {
-                    this.ipInput.value = classDefaults[className].ip;
-                    this.cidrInput.value = classDefaults[className].cidr;
-                    this.cidrSlider.value = classDefaults[className].cidr;
-                    this.calculate();
-                }
+            getIPClass(firstOctet) {
+                if (firstOctet >= 0 && firstOctet <= 127) return 'A';
+                if (firstOctet >= 128 && firstOctet <= 191) return 'B';
+                if (firstOctet >= 192 && firstOctet <= 223) return 'C';
+                if (firstOctet >= 224 && firstOctet <= 239) return 'D';
+                if (firstOctet >= 240 && firstOctet <= 255) return 'E';
+                return null;
+            }
+            
+            updateClassIndicators(ipClass) {
+                ['a', 'b', 'c', 'd', 'e'].forEach(c => {
+                    const el = document.getElementById(`class-${c}`);
+                    if (c.toUpperCase() === ipClass) {
+                        el.classList.add('active');
+                    } else {
+                        el.classList.remove('active');
+                    }
+                });
             }
             
             clear() {
                 this.ipInput.value = '';
                 this.cidrInput.value = '24';
                 this.cidrSlider.value = '24';
+                this.updateSliderValue('24');
+            }
+            
+            updateSliderValue(value) {
+                const sliderValue = document.getElementById('slider-value');
+                sliderValue.textContent = '/' + value;
             }
             
             ipToInt(ip) {
@@ -782,9 +795,22 @@
                 
                 // Update subnet info
                 document.getElementById('subnet-mask-display').textContent = mask;
-                const hostCount = (broadcastInt - networkInt - 1);
-                const subnetCount = Math.pow(2, 32 - cidr);
-                document.getElementById('hosts-subnets').textContent = `${hostCount} / ${subnetCount}`;
+                
+                // Get IP class
+                const firstOctet = parseInt(ip.split('.')[0]);
+                const ipClass = this.getIPClass(firstOctet);
+                this.updateClassIndicators(ipClass);
+                
+                // Calculate hosts per subnet and number of subnets from classful network
+                const hostsPerSubnet = cidr >= 31 ? 0 : Math.pow(2, 32 - cidr) - 2;
+                
+                // Calculate subnets based on classful boundary
+                let classfulCIDR = 8; // Class A default
+                if (firstOctet >= 128 && firstOctet <= 191) classfulCIDR = 16; // Class B
+                else if (firstOctet >= 192 && firstOctet <= 223) classfulCIDR = 24; // Class C
+                
+                const totalSubnets = cidr < classfulCIDR ? 1 : Math.pow(2, cidr - classfulCIDR);
+                document.getElementById('hosts-subnets').textContent = `${hostsPerSubnet} / ${totalSubnets.toLocaleString()}`;
                 
                 // Update private indicator
                 const privateIndicator = document.getElementById('private-indicator');
