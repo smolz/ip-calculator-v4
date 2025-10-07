@@ -2,7 +2,13 @@
 
 A modern, web-based IP subnet calculator with a Mac-inspired interface that provides comprehensive network information across multiple number formats.
 
-![IP Calculator v4 Screenshot](screenshot.png)
+## Screenshots
+
+### Network Details View
+![Network Details](screenshot.png)
+
+### VLSM Subnets View
+![VLSM Subnets](screenshot-vlsm.png)
 
 ## Features
 
