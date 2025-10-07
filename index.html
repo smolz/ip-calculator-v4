@@ -253,6 +253,7 @@
         .slider-wrapper {
             position: relative;
             margin: 20px 0;
+            text-align: center;
         }
         
         .slider {
@@ -307,6 +308,12 @@
             font-weight: 600;
             color: #007AFF;
             font-family: 'Monaco', 'Menlo', monospace;
+            background: #f5f5f5;
+            border: 2px solid #d0d0d0;
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: inline-block;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
         .bottom-section {
@@ -542,6 +549,11 @@
             font-family: 'Monaco', 'Menlo', monospace;
         }
         
+        .vlsm-subnet-header:hover {
+            color: #0056CC;
+            text-decoration: underline;
+        }
+        
         .vlsm-subnet-detail {
             display: flex;
             justify-content: space-between;
@@ -579,9 +591,9 @@
             
             <div class="bottom-section">
                 <div class="input-section">
-                    <div style="font-weight: 600; margin-bottom: 15px;">Enter your ip address</div>
+                    <div style="font-weight: 600; margin-bottom: 15px;">Enter your IP address</div>
                     <div class="input-group">
-                        <label>Ip address</label>
+                        <label>IP address</label>
                         <input type="text" class="input-field" id="ip-input" value="192.168.1.0">
                         <span>/</span>
                         <input type="number" class="input-field cidr-input" id="cidr-input" value="24" min="0" max="32">
@@ -630,7 +642,7 @@
                     <div class="section">
                         <div class="section-title">Decimal</div>
                         <div class="field">
-                            <div class="field-label">Ip address:</div>
+                            <div class="field-label">IP address:</div>
                             <div class="field-value" id="dec-ip">192.168.1.0</div>
                         </div>
                         <div class="field">
@@ -662,7 +674,7 @@
                     <div class="section">
                         <div class="section-title">Octal</div>
                         <div class="field">
-                            <div class="field-label">Ip address:</div>
+                            <div class="field-label">IP address:</div>
                             <div class="field-value" id="oct-ip">300.250.1.0</div>
                         </div>
                         <div class="field">
@@ -694,7 +706,7 @@
                     <div class="section">
                         <div class="section-title">Hexadecimal</div>
                         <div class="field">
-                            <div class="field-label">Ip address:</div>
+                            <div class="field-label">IP address:</div>
                             <div class="field-value" id="hex-ip">c0.a8.1.0</div>
                         </div>
                         <div class="field">
@@ -726,7 +738,7 @@
                     <div class="section">
                         <div class="section-title">Binary</div>
                         <div class="field">
-                            <div class="field-label">Ip address:</div>
+                            <div class="field-label">IP address:</div>
                             <div class="field-value" id="bin-ip">11000000.10101000.00000001.00000000</div>
                         </div>
                         <div class="field">
@@ -938,6 +950,18 @@
                 document.getElementById('vlsm-content').innerHTML = html;
             }
             
+            loadSubnet(network, cidr) {
+                this.ipInput.value = network;
+                this.cidrInput.value = cidr;
+                this.cidrSlider.value = cidr;
+                this.updateSliderValue(cidr);
+                this.calculate();
+                // Stay on VLSM view and regenerate
+                if (this.currentMode === 'vlsm') {
+                    this.generateVLSM();
+                }
+            }
+            
             showSubnetDetails(targetCidr) {
                 const ip = this.ipInput.value.trim();
                 const cidr = parseInt(this.cidrInput.value);
@@ -974,7 +998,7 @@
                     const network = this.intToIp(subnetNetwork);
                     
                     html += '<div class="vlsm-subnet-item">';
-                    html += `<div class="vlsm-subnet-header">Subnet ${i + 1}: ${network}/${targetCidr}</div>`;
+                    html += `<div class="vlsm-subnet-header" onclick="calculator.loadSubnet('${network}', ${targetCidr})" style="cursor: pointer;">Subnet ${i + 1}: ${network}/${targetCidr}</div>`;
                     html += '<div class="vlsm-subnet-detail">';
                     html += '<span class="vlsm-subnet-label">Subnet Mask:</span>';
                     html += `<span class="vlsm-subnet-value">${subnetMask}</span>`;
@@ -1104,14 +1128,41 @@
                 ).join('.');
             }
             
-            isPrivateIP(ip) {
-                const parts = ip.split('.').map(p => parseInt(p));
-                const [a, b, c] = parts;
+            getSpecialAddressInfo(ip) {
+                const ipInt = this.ipToInt(ip);
                 
-                return (a === 10) ||
-                       (a === 172 && b >= 16 && b <= 31) ||
-                       (a === 192 && b === 168) ||
-                       (a === 127);
+                // Check special address blocks in order
+                const specialBlocks = [
+                    { start: '0.0.0.0', end: '0.255.255.255', label: 'Local', rfc: 'RFC6890', url: 'https://datatracker.ietf.org/doc/html/rfc6890' },
+                    { start: '10.0.0.0', end: '10.255.255.255', label: 'Private', rfc: 'RFC1918', url: 'https://datatracker.ietf.org/doc/html/rfc1918' },
+                    { start: '100.64.0.0', end: '100.127.255.255', label: 'CGN', rfc: 'RFC6598', url: 'https://datatracker.ietf.org/doc/html/rfc6598' },
+                    { start: '127.0.0.0', end: '127.255.255.255', label: 'Loopback', rfc: 'RFC6890', url: 'https://datatracker.ietf.org/doc/html/rfc6890' },
+                    { start: '169.254.0.0', end: '169.254.255.255', label: 'Link-Local', rfc: 'RFC3927', url: 'https://datatracker.ietf.org/doc/html/rfc3927' },
+                    { start: '172.16.0.0', end: '172.31.255.255', label: 'Private', rfc: 'RFC1918', url: 'https://datatracker.ietf.org/doc/html/rfc1918' },
+                    { start: '192.0.0.0', end: '192.0.0.255', label: 'Reserved', rfc: 'RFC6890', url: 'https://datatracker.ietf.org/doc/html/rfc6890' },
+                    { start: '192.0.2.0', end: '192.0.2.255', label: 'Documentation', rfc: 'RFC5737', url: 'https://datatracker.ietf.org/doc/html/rfc5737' },
+                    { start: '192.88.99.0', end: '192.88.99.255', label: 'Reserved', rfc: 'RFC7526', url: 'https://datatracker.ietf.org/doc/html/rfc7526' },
+                    { start: '192.168.0.0', end: '192.168.255.255', label: 'Private', rfc: 'RFC1918', url: 'https://datatracker.ietf.org/doc/html/rfc1918' },
+                    { start: '198.18.0.0', end: '198.19.255.255', label: 'Testing', rfc: 'RFC2544', url: 'https://datatracker.ietf.org/doc/html/rfc2544' },
+                    { start: '198.51.100.0', end: '198.51.100.255', label: 'Documentation', rfc: 'RFC5737', url: 'https://datatracker.ietf.org/doc/html/rfc5737' },
+                    { start: '203.0.113.0', end: '203.0.113.255', label: 'Documentation', rfc: 'RFC5737', url: 'https://datatracker.ietf.org/doc/html/rfc5737' },
+                    { start: '224.0.0.0', end: '239.255.255.255', label: 'Multicast', rfc: 'RFC5771', url: 'https://datatracker.ietf.org/doc/html/rfc5771' },
+                    { start: '233.252.0.0', end: '233.252.0.255', label: 'Documentation', rfc: 'RFC6676', url: 'https://datatracker.ietf.org/doc/html/rfc6676' },
+                    { start: '240.0.0.0', end: '255.255.255.254', label: 'Reserved', rfc: 'RFC3232', url: 'https://datatracker.ietf.org/doc/html/rfc3232' },
+                    { start: '255.255.255.255', end: '255.255.255.255', label: 'Broadcast', rfc: 'RFC6890', url: 'https://datatracker.ietf.org/doc/html/rfc6890' }
+                ];
+                
+                for (const block of specialBlocks) {
+                    const startInt = this.ipToInt(block.start);
+                    const endInt = this.ipToInt(block.end);
+                    
+                    if (ipInt >= startInt && ipInt <= endInt) {
+                        return block;
+                    }
+                }
+                
+                // If not in any special block, it's public
+                return { label: 'Public', rfc: null, url: null };
             }
             
             calculate() {
@@ -1190,15 +1241,32 @@
                 const totalSubnets = cidr < classfulCIDR ? 1 : Math.pow(2, cidr - classfulCIDR);
                 document.getElementById('hosts-subnets').textContent = `${hostsPerSubnet} / ${totalSubnets.toLocaleString()}`;
                 
-                // Update private indicator
+                // Update address type indicator with reference link
                 const privateIndicator = document.getElementById('private-indicator');
-                if (this.isPrivateIP(ip)) {
-                    privateIndicator.textContent = 'Private';
-                    privateIndicator.style.background = '#ff4444';
+                const addressInfo = this.getSpecialAddressInfo(ip);
+                
+                // Set label text and reference link
+                if (addressInfo.rfc) {
+                    privateIndicator.innerHTML = `${addressInfo.label} <a href="${addressInfo.url}" target="_blank" style="color: white; text-decoration: underline; margin-left: 4px;">Reference</a>`;
                 } else {
-                    privateIndicator.textContent = 'Public';
-                    privateIndicator.style.background = '#44aa44';
+                    privateIndicator.textContent = addressInfo.label;
                 }
+                
+                // Set background color based on label type
+                const colorMap = {
+                    'Private': '#ff4444',
+                    'Public': '#44aa44',
+                    'Local': '#ff8800',
+                    'Loopback': '#9966ff',
+                    'Link-Local': '#ff8800',
+                    'CGN': '#ff8800',
+                    'Reserved': '#888888',
+                    'Documentation': '#3399ff',
+                    'Testing': '#3399ff',
+                    'Multicast': '#cc66ff',
+                    'Broadcast': '#ff0066'
+                };
+                privateIndicator.style.background = colorMap[addressInfo.label] || '#888888';
                 
                 // Update VLSM if in that mode
                 if (this.currentMode === 'vlsm') {
